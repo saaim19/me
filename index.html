@@ -1,421 +1,1209 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mohd Saaim Siddiqui | Interactive Portfolio</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap');
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Saaim Siddiqui — Mountain Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#07090f;font-family:'Poppins',sans-serif;touch-action:none;-webkit-tap-highlight-color:transparent}
+canvas{display:block;position:fixed;top:0;left:0;z-index:1}
 
-        body {
-            margin: 0;
-            overflow: hidden;
-            background-color: #000;
-            font-family: 'Rajdhani', sans-serif;
-            color: white;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
+/* ====== INTRO SCREEN ====== */
+#intro{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,#07090f 0%,#0d1b2a 50%,#1b2838 100%);transition:opacity 1.2s ease,transform 1.2s ease}
+#intro.hidden{opacity:0;pointer-events:none;transform:translateY(-40px)}
+#intro canvas{position:absolute;inset:0;z-index:0;pointer-events:none}
+.intro-content{position:relative;z-index:2;text-align:center;padding:20px;max-width:600px}
+.intro-badge{display:inline-block;padding:6px 20px;border:1px solid rgba(255,183,77,.4);border-radius:30px;color:#ffb74d;font-size:11px;letter-spacing:4px;text-transform:uppercase;margin-bottom:24px;backdrop-filter:blur(4px);background:rgba(255,183,77,.06)}
+.intro-content h1{font-size:clamp(2rem,7vw,5.5rem);font-weight:900;color:#fff;line-height:1.05;letter-spacing:-1px;text-shadow:0 0 80px rgba(255,183,77,.15)}
+.intro-content h1 span{display:block;background:linear-gradient(135deg,#ffb74d,#ff8a65,#ffb74d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.intro-subtitle{color:rgba(255,255,255,.55);font-size:clamp(.8rem,2vw,1.15rem);font-weight:300;margin-top:12px;letter-spacing:1px}
+.intro-quote{color:rgba(255,183,77,.5);font-style:italic;font-size:clamp(.72rem,1.5vw,.85rem);margin-top:24px;max-width:440px;margin-left:auto;margin-right:auto}
+#startBtn{position:relative;z-index:10;margin-top:32px;padding:14px 44px;border:none;border-radius:50px;background:linear-gradient(135deg,#ff8a65,#ffb74d);color:#1a1a2e;font-family:'Poppins',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;letter-spacing:1px;transition:all .3s ease;box-shadow:0 4px 30px rgba(255,138,101,.3)}
+#startBtn:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 8px 40px rgba(255,138,101,.5)}
+.intro-hint{color:rgba(255,255,255,.25);font-size:.68rem;margin-top:16px;letter-spacing:1px}
+.intro-hint-mobile{display:none}
+@media(hover:none)and(pointer:coarse){.intro-hint-desktop{display:none}.intro-hint-mobile{display:block}}
 
-        /* --- UI LAYER --- */
-        #ui-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
+/* ====== LANDSCAPE OVERLAY ====== */
+#landscapeOverlay{position:fixed;inset:0;z-index:200;background:rgba(7,9,15,.95);display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:30px}
+#landscapeOverlay .rotate-icon{font-size:3rem;margin-bottom:16px;animation:rotateHint 2s ease-in-out infinite}
+#landscapeOverlay p{color:rgba(255,255,255,.6);font-size:.9rem;max-width:260px}
+#landscapeOverlay .dismiss{margin-top:20px;padding:8px 24px;border:1px solid rgba(255,183,77,.3);border-radius:20px;background:transparent;color:#ffb74d;font-family:'Poppins',sans-serif;font-size:.8rem;cursor:pointer}
+@keyframes rotateHint{0%,100%{transform:rotate(0deg)}50%{transform:rotate(90deg)}}
 
-        /* Header */
-        #header {
-            padding: 30px 40px;
-            pointer-events: auto;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.8);
-        }
+/* ====== INFO PANEL ====== */
+#infoPanel{position:fixed;top:0;right:0;width:min(480px,92vw);height:100%;z-index:50;transform:translateX(110%);transition:transform .5s cubic-bezier(.16,1,.3,1);pointer-events:none}
+#infoPanel.open{transform:translateX(0);pointer-events:all}
+.panel-bg{position:absolute;inset:0;background:rgba(10,14,26,.94);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-left:1px solid rgba(255,183,77,.1)}
+.panel-inner{position:relative;z-index:2;height:100%;overflow-y:auto;padding:40px 28px 100px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(255,183,77,.2) transparent}
+.panel-inner::-webkit-scrollbar{width:4px}
+.panel-inner::-webkit-scrollbar-thumb{background:rgba(255,183,77,.2);border-radius:2px}
+.panel-close{position:absolute;top:16px;right:16px;width:40px;height:40px;border:1px solid rgba(255,255,255,.1);border-radius:50%;background:rgba(255,255,255,.04);color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;z-index:3}
+.panel-close:hover,.panel-close:active{background:rgba(255,183,77,.15);border-color:rgba(255,183,77,.3)}
+.panel-camp{display:inline-block;padding:4px 14px;border-radius:20px;background:rgba(255,183,77,.1);color:#ffb74d;font-size:.7rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
+.panel-title{font-size:clamp(1.2rem,4vw,1.6rem);font-weight:700;color:#fff;line-height:1.2;margin-bottom:4px}
+.panel-subtitle{color:rgba(255,183,77,.7);font-size:.85rem;font-weight:400;margin-bottom:6px}
+.panel-period{color:rgba(255,255,255,.35);font-size:.75rem;margin-bottom:20px;display:block}
+.panel-divider{height:1px;background:linear-gradient(90deg,rgba(255,183,77,.2),transparent);margin:16px 0}
+.panel-text{color:rgba(255,255,255,.7);font-size:clamp(.8rem,2vw,.88rem);line-height:1.65}
+.panel-text ul{list-style:none;padding:0}
+.panel-text ul li{position:relative;padding-left:18px;margin-bottom:10px}
+.panel-text ul li::before{content:'▸';position:absolute;left:0;color:#ffb74d}
+.panel-text strong,.panel-text b{color:#ffb74d;font-weight:600}
+.panel-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}
+.stat-card{background:rgba(255,183,77,.06);border:1px solid rgba(255,183,77,.1);border-radius:12px;padding:12px 8px;text-align:center}
+.stat-value{display:block;font-size:clamp(1.1rem,3vw,1.5rem);font-weight:700;color:#ffb74d}
+.stat-label{display:block;font-size:.6rem;color:rgba(255,255,255,.4);margin-top:4px;letter-spacing:.5px}
+.panel-contact a{color:#ffb74d;text-decoration:none;transition:color .2s}
+.panel-contact a:hover{color:#ff8a65}
+.panel-skills{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.skill-tag{padding:5px 12px;border-radius:20px;font-size:.72rem;background:rgba(255,183,77,.08);border:1px solid rgba(255,183,77,.15);color:rgba(255,255,255,.7)}
+.skill-cat{color:#ffb74d;font-size:.72rem;font-weight:600;margin-top:14px;margin-bottom:6px;letter-spacing:1px;text-transform:uppercase}
 
-        h1 {
-            font-size: 2.5rem;
-            margin: 0;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            background: linear-gradient(90deg, #fff, #00ffff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+/* ====== HUD ====== */
+#hud{position:fixed;top:0;left:0;right:0;z-index:40;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;pointer-events:none;opacity:0;transition:opacity .8s}
+#hud.visible{opacity:1}
+.hud-name{color:#ffb74d;font-size:clamp(.95rem,2.5vw,1.3rem);font-weight:700;letter-spacing:3px;margin-bottom:4px;text-shadow:0 0 20px rgba(255,183,77,.2)}
+.hud-altitude{color:rgba(255,255,255,.5);font-size:.68rem;letter-spacing:1px}
+.hud-altitude span{color:#ffb74d;font-weight:600;font-size:.8rem}
+.hud-progress{display:flex;align-items:center;gap:8px}
+.progress-dots{display:flex;gap:5px}
+.progress-dot{width:9px;height:9px;border-radius:50%;border:1.5px solid rgba(255,183,77,.3);background:transparent;transition:all .4s}
+.progress-dot.discovered{background:#ffb74d;border-color:#ffb74d;box-shadow:0 0 8px rgba(255,183,77,.4)}
+.hud-camp-count{color:rgba(255,255,255,.4);font-size:.65rem}
 
-        .subtitle {
-            font-family: 'JetBrains Mono', monospace;
-            color: #00ffff;
-            font-size: 0.9rem;
-            margin-top: 5px;
-            opacity: 0.8;
-        }
+/* ====== DISCOVERY TOAST ====== */
+#toast{position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-20px);z-index:60;padding:10px 28px;border-radius:30px;background:rgba(255,183,77,.12);border:1px solid rgba(255,183,77,.25);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#ffb74d;font-size:.8rem;font-weight:600;letter-spacing:1px;opacity:0;transition:all .5s cubic-bezier(.16,1,.3,1);pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-        /* Mobile Header Tweaks */
-        @media (max-width: 768px) {
-            #header { padding: 20px; }
-            h1 { font-size: 1.8rem; }
-            .subtitle { font-size: 0.75rem; }
-        }
+/* ====== NARRATIVE CAPTION ====== */
+#caption{position:fixed;bottom:18%;left:50%;transform:translateX(-50%);z-index:55;text-align:center;pointer-events:none;opacity:0;transition:opacity .8s ease}
+#caption.show{opacity:1}
+#caption .cap-text{color:rgba(255,255,255,.85);font-size:clamp(.9rem,2.5vw,1.2rem);font-weight:300;font-style:italic;letter-spacing:1.5px;text-shadow:0 2px 20px rgba(0,0,0,.6);line-height:1.5}
+#caption .cap-label{color:#ffb74d;font-size:clamp(.6rem,1.5vw,.72rem);font-weight:600;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;text-shadow:0 2px 12px rgba(0,0,0,.4)}
 
-        /* Content Panel */
-        #content-panel {
-            position: absolute;
-            background: rgba(10, 10, 15, 0.95);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(0, 255, 255, 0.3);
-            pointer-events: auto;
-            display: flex;
-            flex-direction: column;
-            padding: 40px;
-            box-sizing: border-box;
-            overflow-y: auto;
-            box-shadow: 0 0 50px rgba(0,0,0,0.9);
-            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-            z-index: 20;
-        }
+/* ====== INTERACT PROMPT ====== */
+#prompt{position:fixed;z-index:30;padding:7px 18px;border-radius:20px;background:rgba(10,14,26,.8);border:1px solid rgba(255,183,77,.2);color:rgba(255,255,255,.7);font-size:.7rem;letter-spacing:1px;opacity:0;transition:opacity .3s;pointer-events:none;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);white-space:nowrap}
+#prompt.show{opacity:1}
+#prompt kbd{display:inline-block;padding:1px 7px;border-radius:4px;background:rgba(255,183,77,.15);color:#ffb74d;font-family:inherit;font-weight:600;margin:0 2px}
 
-        /* Desktop: Slide from Right */
-        @media (min-width: 769px) {
-            #content-panel {
-                top: 0; right: 0;
-                width: 450px; height: 100vh;
-                transform: translateX(100%);
-                border-left: 1px solid rgba(0, 255, 255, 0.3);
-            }
-            #content-panel.active { transform: translateX(0); }
-        }
+/* ====== MOBILE CONTROLS ====== */
+.mobile-controls{position:fixed;bottom:0;left:0;right:0;z-index:45;display:none;justify-content:space-between;align-items:flex-end;padding:0 16px 16px;pointer-events:none}
+.mc-group{display:flex;gap:10px;pointer-events:all}
+.mc-btn{width:58px;height:58px;border-radius:50%;border:2px solid rgba(255,183,77,.2);background:rgba(10,14,26,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:rgba(255,255,255,.5);font-size:1.4rem;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;transition:all .1s}
+.mc-btn:active,.mc-btn.active{background:rgba(255,183,77,.2);border-color:#ffb74d;transform:scale(.9)}
+.mc-btn-interact{width:auto;padding:0 24px;border-radius:30px;font-size:.78rem;letter-spacing:1px;font-family:'Poppins',sans-serif;font-weight:600;color:#ffb74d;border-color:rgba(255,183,77,.3)}
 
-        /* Mobile: Slide from Bottom */
-        @media (max-width: 768px) {
-            #content-panel {
-                bottom: 0; left: 0;
-                width: 100%; height: 75vh; 
-                transform: translateY(105%); 
-                border-top: 1px solid rgba(0, 255, 255, 0.3);
-                border-radius: 20px 20px 0 0;
-                padding: 25px;
-            }
-            #content-panel.active { transform: translateY(0); }
-        }
+@media(hover:none)and(pointer:coarse){.mobile-controls{display:flex}}
+@media(max-width:600px){
+  .panel-stats{grid-template-columns:1fr 1fr}
+  .panel-inner{padding:32px 20px 100px}
+}
+@media(max-height:440px){
+  .mobile-controls{padding-bottom:8px}
+  .mc-btn{width:46px;height:46px;font-size:1.1rem}
+  .mc-btn-interact{padding:0 18px}
+  #hud{padding:6px 14px}
+  .hud-altitude{font-size:.6rem}
+  .hud-altitude span{font-size:.7rem}
+  .progress-dot{width:7px;height:7px}
+}
 
-        .panel-header {
-            font-size: 1.8rem;
-            color: #00ffff;
-            border-bottom: 2px solid #00ffff;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-        }
-
-        .section-block h3 { color: #ff00ff; font-size: 1.1rem; margin-bottom: 5px; margin-top: 20px; }
-        .section-block h4 { font-family: 'JetBrains Mono', monospace; color: #fff; font-size: 0.85rem; margin: 0 0 10px 0; opacity: 0.7; }
-        .section-block p, .section-block li { font-size: 1rem; line-height: 1.5; color: #d0d0d0; margin-bottom: 8px; }
-
-        .close-btn {
-            position: absolute;
-            top: 20px; right: 20px;
-            background: rgba(0, 255, 255, 0.1);
-            border: 1px solid #00ffff;
-            color: #00ffff;
-            width: 30px; height: 30px;
-            border-radius: 50%;
-            font-size: 1.2rem;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-        }
-
-        #loader {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: #00ffff; font-family: 'JetBrains Mono', monospace; animation: blink 1s infinite;
-        }
-        @keyframes blink { 50% { opacity: 0; } }
-
-        #tap-hint {
-            position: absolute; bottom: 30px; width: 100%; text-align: center;
-            color: rgba(255,255,255,0.5); font-size: 0.8rem; pointer-events: none;
-            text-transform: uppercase; animation: fadeUp 2s infinite;
-            display: none;
-        }
-        @media (max-width: 768px) { #tap-hint { display: block; } }
-        @keyframes fadeUp { 0% {opacity:0; transform:translateY(10px);} 50%{opacity:1;} 100%{opacity:0; transform:translateY(-10px);} }
-    </style>
+/* ====== CONFETTI ====== */
+@keyframes confettiFall{0%{transform:translateY(-10vh) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+.confetti{position:fixed;z-index:55;width:8px;height:8px;pointer-events:none;animation:confettiFall 3s ease-in forwards}
+</style>
 </head>
 <body>
 
-    <div id="loader">INITIALIZING SYSTEM...</div>
+<!-- LANDSCAPE SUGGESTION (portrait mobile only) -->
+<div id="landscapeOverlay">
+  <div class="rotate-icon">&#128241;</div>
+  <p><strong>Rotate your device</strong><br>This adventure is best in landscape mode</p>
+  <button class="dismiss" id="dismissLandscape">Continue Anyway</button>
+</div>
 
-    <div id="ui-layer">
-        <div id="header">
-            <h1>Mohd Saaim Siddiqui</h1>
-            <div class="subtitle">&lt;Backend Developer /&gt; Java &bull; Spring Boot</div>
-        </div>
-        <div id="tap-hint">Tap Nodes to Explore</div>
+<!-- INTRO SCREEN -->
+<div id="intro">
+  <canvas id="introCanvas"></canvas>
+  <div class="intro-content">
+    <div class="intro-badge">Portfolio Expedition</div>
+    <h1>MOHD SAAIM<br><span>SIDDIQUI</span></h1>
+    <p class="intro-subtitle">Backend Software Engineer &bull; 4+ Years Experience</p>
+    <p class="intro-quote">"Every mountain top is within reach if you just keep climbing"</p>
+    <button id="startBtn">Begin the Ascent</button>
+    <p class="intro-hint intro-hint-desktop">Scroll or Arrow Keys to Move &bull; Click Campfires to Explore</p>
+    <p class="intro-hint intro-hint-mobile">Tap buttons or swipe to move &bull; Tap campfires to explore</p>
+  </div>
+</div>
+
+<!-- GAME CANVAS -->
+<canvas id="gameCanvas"></canvas>
+
+<!-- INFO PANEL -->
+<div id="infoPanel">
+  <div class="panel-bg"></div>
+  <div class="panel-inner" id="panelContent"></div>
+  <button class="panel-close" id="panelClose">&times;</button>
+</div>
+
+<!-- HUD -->
+<div id="hud">
+  <div class="hud-left">
+    <div class="hud-name">MOHD SAAIM SIDDIQUI</div>
+    <div class="hud-altitude">ALT <span id="hudAlt">0</span>m</div>
+  </div>
+  <div class="hud-right">
+    <div class="hud-progress">
+      <div class="progress-dots" id="progressDots"></div>
+      <span class="hud-camp-count" id="campCount">0/7</span>
     </div>
+  </div>
+</div>
 
-    <div id="content-panel">
-        <button class="close-btn" onclick="closePanel()">&times;</button>
-        <div id="panel-body"></div>
-    </div>
+<!-- DISCOVERY TOAST -->
+<div id="toast"></div>
 
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-            }
-        }
-    </script>
+<!-- NARRATIVE CAPTION -->
+<div id="caption">
+  <div class="cap-label"></div>
+  <div class="cap-text"></div>
+</div>
 
-    <script type="module">
-        import * as THREE from 'three';
+<!-- INTERACT PROMPT -->
+<div id="prompt"><kbd>SPACE</kbd> to explore</div>
 
-        // --- DEVICE DETECTION & CONFIG ---
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+<!-- MOBILE CONTROLS -->
+<div class="mobile-controls" id="mobileControls">
+  <div class="mc-group">
+    <button class="mc-btn" id="mcLeft">&#9664;</button>
+    <button class="mc-btn" id="mcRight">&#9654;</button>
+  </div>
+  <div class="mc-group">
+    <button class="mc-btn mc-btn-interact" id="mcInteract">EXPLORE</button>
+  </div>
+</div>
 
-        // --- RESUME DATA ---
-        const resumeContent = {
-            "summary": {
-                title: "Summary Profile",
-                html: `<div class="section-block"><p>Backend Developer with <strong>3+ years of experience</strong>.</p><p>Specialized in <strong>Java, Spring Boot, Microservices</strong>, and high-performance SQL/NoSQL databases.</p></div>`
-            },
-            "skills": {
-                title: "Technical Stack",
-                html: `<div class="section-block"><h3>Languages</h3><p>Java (Core & Advanced), Python</p><h3>Frameworks</h3><p>Spring Boot, Hibernate (JPA), Microservices</p><h3>Databases</h3><p>PostgreSQL, Aerospike, Elasticsearch, S3</p></div>`
-            },
-            "experience": {
-                title: "Work Experience",
-                html: `<div class="section-block"><h3>Tripjack - SDE 2</h3><h4>April 2024 - Present</h4><ul><li>Revamped Hotel Search API: <strong>< 1s response</strong>.</li><li>Built Transaction Report Module: <strong>98% accuracy</strong>.</li></ul><h3>Tripjack - SDE 1</h3><h4>July 2022 - March 2024</h4><ul><li>Optimized DB queries reducing time by <strong>20%</strong>.</li></ul></div>`
-            },
-            "projects": {
-                title: "Projects & Education",
-                html: `<div class="section-block"><h3>E-Commerce Platform</h3><p>Spring Boot app with <strong>85%+ test coverage</strong>.</p><h3>Education</h3><p><strong>MCA</strong> - Bharati Vidyapeeth (96.1%)</p></div>`
-            }
-        };
+<script>
+// ===========================================================
+//  CONSTANTS & CONFIG
+// ===========================================================
+const WORLD_W = 4940;
+const REF_H = 700;            // reference design height
+const CHAR_BASE_SPEED = 3.2;
+const CAM_EASE = 0.07;
+const INTERACT_DIST = 90;
 
-        // --- 1. SCENE SETUP ---
-        const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x000000, 0.002);
+// ===========================================================
+//  DOM
+// ===========================================================
+const introEl        = document.getElementById('intro');
+const introCanvas    = document.getElementById('introCanvas');
+const ictx           = introCanvas.getContext('2d');
+const gameCanvas     = document.getElementById('gameCanvas');
+const ctx            = gameCanvas.getContext('2d');
+const infoPanel      = document.getElementById('infoPanel');
+const panelContent   = document.getElementById('panelContent');
+const panelClose     = document.getElementById('panelClose');
+const hudEl          = document.getElementById('hud');
+const hudAlt         = document.getElementById('hudAlt');
+const progressDots   = document.getElementById('progressDots');
+const campCountEl    = document.getElementById('campCount');
+const toastEl        = document.getElementById('toast');
+const captionEl      = document.getElementById('caption');
+const capLabel       = captionEl.querySelector('.cap-label');
+const capText        = captionEl.querySelector('.cap-text');
+const promptEl       = document.getElementById('prompt');
+const landscapeOvl   = document.getElementById('landscapeOverlay');
 
-        const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 1000);
-        
-        // --- ADAPTIVE CAMERA FUNCTION ---
-        // This calculates the perfect distance based on screen aspect ratio
-        function updateCameraBasePosition() {
-            const aspect = window.innerWidth / window.innerHeight;
-            // If aspect > 1 (Desktop), utilize height (130). 
-            // If aspect < 1 (Mobile), utilize width (130 / aspect).
-            // This ensures the 3D scene fits inside the viewport regardless of rotation.
-            const distance = Math.max(130, 130 / aspect);
-            return distance;
-        }
-        
-        // Set initial Z
-        let baseZ = updateCameraBasePosition();
-        camera.position.z = baseZ;
+// ===========================================================
+//  RESPONSIVE STATE
+// ===========================================================
+let W, H, S;  // width, height, y-scale factor
+let isMobile = 'ontouchstart' in window;
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        document.body.appendChild(renderer.domElement);
+function resize() {
+  W = window.innerWidth; H = window.innerHeight;
+  S = H / REF_H;  // scale factor — all Y coords multiply by this
+  gameCanvas.width = W; gameCanvas.height = H;
+  introCanvas.width = W; introCanvas.height = H;
+  // Check orientation (only on narrow mobile screens)
+  checkOrientation();
+}
+let landscapeDismissed = false;
+window.addEventListener('resize', resize);
+resize();
+function checkOrientation() {
+  if (landscapeDismissed || !isMobile) { landscapeOvl.style.display = 'none'; return; }
+  if (W < 580 && H > W * 1.2) {
+    landscapeOvl.style.display = 'flex';
+  } else {
+    landscapeOvl.style.display = 'none';
+  }
+}
+document.getElementById('dismissLandscape').addEventListener('click', () => {
+  landscapeDismissed = true; landscapeOvl.style.display = 'none';
+});
 
-        document.getElementById('loader').style.display = 'none';
+// ===========================================================
+//  TERRAIN (reference Y values for REF_H = 700)
+// ===========================================================
+const TERRAIN_RAW = [
+  [0,590],[65,588],[130,585],[230,582],[325,580],[425,580],
+  [520,578],[620,572],[715,560],[815,545],[910,528],
+  [1010,515],[1075,508],[1140,505],[1205,505],[1270,508],
+  [1365,498],[1465,482],[1560,462],[1660,445],[1755,430],
+  [1820,422],[1885,418],[1950,418],[2015,420],
+  [2080,412],[2180,395],[2275,375],[2375,358],[2470,342],
+  [2535,335],[2600,332],[2665,332],[2730,335],
+  [2795,325],[2895,308],[2990,288],[3090,268],[3185,252],
+  [3250,245],[3315,242],[3380,242],[3445,245],
+  [3510,232],[3610,215],[3705,195],[3805,178],
+  [3870,168],[3935,162],[4000,158],[4095,155],[4195,155],
+  [4260,152],[4325,148],[4390,142],[4455,138],[4520,135],
+  [4585,132],[4650,130],[4715,132],[4810,138],[4940,150]
+];
 
-        // --- 2. TEXT GENERATOR ---
-        function createTextSprite(text, colorStr) {
-            const canvas = document.createElement('canvas');
-            canvas.width = 512;
-            canvas.height = 128;
-            const ctx = canvas.getContext('2d');
-            ctx.font = 'bold 50px "Rajdhani"'; 
-            ctx.fillStyle = colorStr;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.shadowColor = colorStr;
-            ctx.shadowBlur = 20;
-            ctx.fillText(text.toUpperCase(), 256, 64);
+function getTerrainY(wx) {
+  for (let i = 0; i < TERRAIN_RAW.length - 1; i++) {
+    const [x0, y0] = TERRAIN_RAW[i], [x1, y1] = TERRAIN_RAW[i + 1];
+    if (wx >= x0 && wx <= x1) {
+      const t = (wx - x0) / (x1 - x0);
+      return (y0 + t * (y1 - y0)) * S;
+    }
+  }
+  const last = wx < TERRAIN_RAW[0][0] ? TERRAIN_RAW[0][1] : TERRAIN_RAW[TERRAIN_RAW.length - 1][1];
+  return last * S;
+}
 
-            const texture = new THREE.CanvasTexture(canvas);
-            const material = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false, opacity: 0.9 });
-            const sprite = new THREE.Sprite(material);
-            
-            const scale = isMobile ? 45 : 40;
-            sprite.scale.set(scale, scale/4, 1);
-            return sprite;
-        }
+// ===========================================================
+//  CAMPS DATA
+// ===========================================================
+const CAMPS = [
+  {
+    x:350, name:'Base Camp', label:'Profile', icon:'\u26FA', altitude:4200,
+    caption:'Where every journey begins...',
+    html:`
+      <span class="panel-camp">Base Camp \u2014 4,200m</span>
+      <h2 class="panel-title">Mohd Saaim Siddiqui</h2>
+      <p class="panel-subtitle">Backend Software Engineer</p>
+      <div class="panel-divider"></div>
+      <div class="panel-text"><p>4+ years building <b>high-throughput, low-latency systems</b> in Java and Python for transaction-heavy platforms.</p></div>
+      <div class="panel-stats">
+        <div class="stat-card"><span class="stat-value">92%</span><span class="stat-label">Sync-Failure Reduction</span></div>
+        <div class="stat-card"><span class="stat-value">98%</span><span class="stat-label">Financial Accuracy</span></div>
+        <div class="stat-card"><span class="stat-value">75%</span><span class="stat-label">Latency Reduction</span></div>
+      </div>
+      <div class="panel-divider"></div>
+      <div class="panel-text panel-contact">
+        <p>\u2709 <a href="mailto:mohdsaaim19@gmail.com">mohdsaaim19@gmail.com</a></p>
+        <p>\u260E +91-9625530364</p>
+        <p>\uD83D\uDD17 <a href="https://linkedin.com/in/mohdsaaimsiddiqui" target="_blank">linkedin.com/in/mohdsaaimsiddiqui</a></p>
+      </div>`
+  },
+  {
+    x:1150, name:'Forest Lodge', label:'Education', icon:'\uD83C\uDF93', altitude:4950,
+    caption:'The roots of knowledge run deep...',
+    html:`
+      <span class="panel-camp">Forest Lodge \u2014 4,950m</span>
+      <h2 class="panel-title">Education</h2>
+      <div class="panel-divider"></div>
+      <div class="panel-text">
+        <h3 style="color:#fff;font-size:1rem;margin-bottom:2px">Master of Computer Applications (MCA)</h3>
+        <p style="color:rgba(255,255,255,.45);font-size:.8rem">Bharati Vidyapeeth\u2019s Institute \u2014 GGSIPU \u2022 2022</p>
+        <div class="panel-stats" style="margin:10px 0 18px"><div class="stat-card"><span class="stat-value">96.1%</span><span class="stat-label">Score</span></div></div>
+        <h3 style="color:#fff;font-size:1rem;margin-bottom:2px">B.Sc. (Hons) Computer Science</h3>
+        <p style="color:rgba(255,255,255,.45);font-size:.8rem">Bhaskaracharya College \u2014 Delhi University \u2022 2019</p>
+        <div class="panel-stats" style="margin:10px 0 0"><div class="stat-card"><span class="stat-value">74.2%</span><span class="stat-label">Score</span></div></div>
+      </div>`
+  },
+  {
+    x:1950, name:'Trail Camp', label:'SDE Intern', icon:'\uD83C\uDFD5', altitude:5820,
+    caption:'First steps into the wild...',
+    html:`
+      <span class="panel-camp">Trail Camp \u2014 5,820m</span>
+      <h2 class="panel-title">SDE Intern</h2>
+      <p class="panel-subtitle">Tripjack</p>
+      <span class="panel-period">November 2021 \u2014 June 2022</span>
+      <div class="panel-divider"></div>
+      <div class="panel-text"><ul>
+        <li>Integrated <b>4+ third-party supplier APIs</b> from scratch, building robust data transformation and normalization layers.</li>
+        <li>Contributed to foundational <b>microservices architecture</b>, developing reusable service templates adopted team-wide.</li>
+        <li>Delivered production-ready features in a fast-paced <b>Agile team of 12</b>, meeting all sprint deadlines.</li>
+      </ul></div>`
+  },
+  {
+    x:2650, name:'Mountain Hut', label:'SDE 1 — Tripjack', icon:'\uD83C\uDFD4', altitude:6680,
+    caption:'Building strength for the climb ahead...',
+    html:`
+      <span class="panel-camp">Mountain Hut \u2014 6,680m</span>
+      <h2 class="panel-title">Software Dev Engineer 1</h2>
+      <p class="panel-subtitle">Tripjack</p>
+      <span class="panel-period">July 2022 \u2014 March 2024</span>
+      <div class="panel-divider"></div>
+      <div class="panel-text"><ul>
+        <li>Enhanced search relevance and query performance \u2192 <b>30% increase in booking revenue</b>.</li>
+        <li>Optimized slow-running <b>SQL queries and stored procedures</b> in PostgreSQL \u2014 <b>20% faster</b> data retrieval.</li>
+        <li>Led backward-compatibility for multi-supplier data integration \u2014 <b>data consistency across 10+ suppliers</b>.</li>
+        <li>Designed a <b>virtual points currency system</b> with real-time balance tracking and transactional integrity.</li>
+      </ul></div>`
+  },
+  {
+    x:3400, name:'High Camp', label:'SDE 2 — Tripjack', icon:'\u26F0', altitude:7580,
+    caption:'Pushing through the clouds...',
+    html:`
+      <span class="panel-camp">High Camp \u2014 7,580m</span>
+      <h2 class="panel-title">Software Dev Engineer 2</h2>
+      <p class="panel-subtitle">Tripjack</p>
+      <span class="panel-period">April 2024 \u2014 December 2025</span>
+      <div class="panel-divider"></div>
+      <div class="panel-text"><ul>
+        <li>Designed transaction reporting for <b>50,000+ daily bookings</b> with <b>98% financial accuracy</b>.</li>
+        <li>Resolved reconciliation bottlenecks across PostgreSQL, Aerospike, Redis & ES \u2014 <b>92% fewer sync failures</b>.</li>
+        <li>Re-architected Hotel Search API: multithreading + Redis + Drools \u2192 <b>sub-1s response</b> (from 4.2s) across <b>100K+ daily requests</b>.</li>
+        <li>Architected scalable rebooking system with event-driven workflows \u2014 <b>40% higher profit margins</b>.</li>
+        <li>Mentored <b>20 engineers</b> on Java best practices and microservices architecture.</li>
+      </ul></div>
+      <div class="panel-stats">
+        <div class="stat-card"><span class="stat-value">50K+</span><span class="stat-label">Daily Bookings</span></div>
+        <div class="stat-card"><span class="stat-value">100K+</span><span class="stat-label">Daily Requests</span></div>
+        <div class="stat-card"><span class="stat-value">4.2\u21920.9s</span><span class="stat-label">Latency</span></div>
+      </div>`
+  },
+  {
+    x:4100, name:'Summit Ridge', label:'Backend Lead — Raxa', icon:'\uD83D\uDEA9', altitude:8450,
+    caption:'The air grows thin, the view grows wide...',
+    html:`
+      <span class="panel-camp">Summit Ridge \u2014 8,450m</span>
+      <h2 class="panel-title">Backend Lead</h2>
+      <p class="panel-subtitle">Raxa</p>
+      <span class="panel-period">December 2025 \u2014 March 2026</span>
+      <div class="panel-divider"></div>
+      <div class="panel-text"><ul>
+        <li>Implemented <b>Redis caching</b> across APIs \u2014 <b>35% less DB load</b>, response times <b>1.2s \u2192 0.4s</b>.</li>
+        <li>Migrated monolith to <b>AWS ECS microservices</b> \u2014 <b>99.5% uptime</b> with auto-scaling.</li>
+        <li>Deployed cloud-native services (ECS, S3, Secrets Manager) \u2014 <b>20% cost reduction</b>.</li>
+        <li>Optimized CI/CD pipelines \u2014 <b>40% faster delivery velocity</b>.</li>
+      </ul></div>
+      <div class="panel-stats">
+        <div class="stat-card"><span class="stat-value">67%</span><span class="stat-label">Faster Responses</span></div>
+        <div class="stat-card"><span class="stat-value">99.5%</span><span class="stat-label">Uptime</span></div>
+        <div class="stat-card"><span class="stat-value">20%</span><span class="stat-label">Cost Saved</span></div>
+      </div>`
+  },
+  {
+    x:4800, name:'The Summit', label:'Skills & Arsenal', icon:'\uD83C\uDFC6', altitude:8849,
+    caption:'You\'ve reached the peak. Take it all in.',
+    html:`
+      <span class="panel-camp">The Summit \u2014 8,849m</span>
+      <h2 class="panel-title">Skills & Arsenal</h2>
+      <div class="panel-divider"></div>
+      <p class="skill-cat">Languages</p>
+      <div class="panel-skills"><span class="skill-tag">Java 8/11/17</span><span class="skill-tag">Python</span></div>
+      <p class="skill-cat">Databases \u2014 SQL</p>
+      <div class="panel-skills"><span class="skill-tag">PostgreSQL</span><span class="skill-tag">MySQL</span><span class="skill-tag">Query Optimization</span><span class="skill-tag">Stored Procedures</span></div>
+      <p class="skill-cat">Databases \u2014 NoSQL</p>
+      <div class="panel-skills"><span class="skill-tag">Aerospike</span><span class="skill-tag">Elasticsearch</span><span class="skill-tag">Redis</span></div>
+      <p class="skill-cat">Frameworks</p>
+      <div class="panel-skills"><span class="skill-tag">Spring Boot</span><span class="skill-tag">Spring MVC</span><span class="skill-tag">Spring Security</span><span class="skill-tag">Hibernate</span><span class="skill-tag">JPA</span></div>
+      <p class="skill-cat">Architecture</p>
+      <div class="panel-skills"><span class="skill-tag">Microservices</span><span class="skill-tag">REST APIs</span><span class="skill-tag">Event-Driven</span><span class="skill-tag">System Design</span><span class="skill-tag">LLD / HLD</span></div>
+      <p class="skill-cat">DevOps & Tools</p>
+      <div class="panel-skills"><span class="skill-tag">Jenkins</span><span class="skill-tag">GitHub Actions</span><span class="skill-tag">Maven</span><span class="skill-tag">Gradle</span><span class="skill-tag">Docker</span><span class="skill-tag">AWS ECS</span><span class="skill-tag">ELK Stack</span></div>
+      <p class="skill-cat">Core CS</p>
+      <div class="panel-skills"><span class="skill-tag">DSA</span><span class="skill-tag">OOP</span><span class="skill-tag">Multithreading</span><span class="skill-tag">Concurrency</span></div>
+      <div class="panel-divider" style="margin-top:24px"></div>
+      <div class="panel-text panel-contact" style="text-align:center">
+        <p style="color:rgba(255,255,255,.5);font-size:.8rem;margin-bottom:8px">You reached the summit! Let\u2019s connect.</p>
+        <p style="font-size:1rem"><a href="mailto:mohdsaaim19@gmail.com">mohdsaaim19@gmail.com</a></p>
+        <p style="font-size:.9rem"><a href="https://linkedin.com/in/mohdsaaimsiddiqui" target="_blank">LinkedIn Profile</a></p>
+      </div>`
+  }
+];
 
-        // --- 3. PARTICLES ---
-        const pGeo = new THREE.BufferGeometry();
-        const count = isMobile ? 1200 : 4000; 
-        const pos = new Float32Array(count * 3);
-        const vel = [];
-        
-        for(let i=0; i<count; i++) {
-            pos[i*3] = (Math.random() - 0.5) * 800;
-            pos[i*3+1] = (Math.random() - 0.5) * 800;
-            pos[i*3+2] = (Math.random() - 0.5) * 800;
-            vel.push({ x: (Math.random()-0.5)*0.1, y: (Math.random()-0.5)*0.1, z: (Math.random()-0.5)*0.1 });
-        }
-        pGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-        const pMat = new THREE.PointsMaterial({ size: isMobile ? 3 : 2, color: 0x44aaaa, transparent: true, opacity: 0.6 });
-        const starField = new THREE.Points(pGeo, pMat);
-        scene.add(starField);
+// ===========================================================
+//  GAME STATE
+// ===========================================================
+let gameStarted = false;
+let camX = 0, camTargetX = 0;
+let camY = 0, camTargetY = 0;
+let scrollVelocity = 0;
+let player = { x: 200, y: 0, vx: 0, facingRight: true, walking: false, frame: 0 };
+let keys = {};
+let discovered = new Set();
+let prevNearbyCamp = -1;
+let panelOpen = false, activeCamp = -1, nearbyCamp = -1;
+let activeCaptionIdx = -1;  // which camp's caption is currently shown
+let sparks = [], stars = [], clouds = [], mountainLayers = [], trees = [];
+let toastTimer = null, summitCelebrated = false, time = 0;
 
-        // --- 4. ARTIFACTS ---
-        const objectsToCheck = []; 
-        const animatables = []; 
+// Touch state
+let touchStartX = 0, touchStartY = 0, touchMoving = false, swipeDir = 0;
 
-        function createArtifact(id, label, colorHex, colorStr, type, position) {
-            const group = new THREE.Group();
-            group.position.copy(position);
-            scene.add(group);
+// ===========================================================
+//  WORLD GENERATION
+// ===========================================================
+function initWorld() {
+  stars = [];
+  for (let i = 0; i < 300; i++) {
+    stars.push({ x: Math.random() * WORLD_W * 1.5, y: Math.random() * 0.65, size: Math.random() * 1.8 + 0.3,
+      twinkle: Math.random() * Math.PI * 2, speed: Math.random() * 2 + 1 });
+  }
 
-            let geo;
-            const size = isMobile ? 12 : 9; 
-            if(type === 'icosa') geo = new THREE.IcosahedronGeometry(size, 0);
-            if(type === 'torus') geo = new THREE.TorusKnotGeometry(size/1.8, size/5, 64, 8);
-            if(type === 'octa') geo = new THREE.OctahedronGeometry(size, 0);
-            if(type === 'tetra') geo = new THREE.TetrahedronGeometry(size, 0);
+  clouds = [];
+  for (let i = 0; i < 18; i++) {
+    clouds.push({ x: Math.random() * WORLD_W * 1.3, y: 0.05 + Math.random() * 0.3,
+      w: 80 + Math.random() * 180, h: 20 + Math.random() * 40,
+      speed: 0.08 + Math.random() * 0.15, opacity: 0.03 + Math.random() * 0.06 });
+  }
 
-            const mat = new THREE.MeshBasicMaterial({ color: colorHex, wireframe: true, transparent: true, opacity: 0.4 });
-            const mesh = new THREE.Mesh(geo, mat);
-            
-            const coreMat = new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.1 });
-            const core = new THREE.Mesh(geo, coreMat);
-            core.scale.setScalar(0.9);
-            mesh.add(core);
-            group.add(mesh);
+  mountainLayers = [];
+  const layerConfigs = [
+    { parallax: 0.08, baseR: 0.65, ampR: 0.28, color: '#0d1520', step: 60 },
+    { parallax: 0.18, baseR: 0.70, ampR: 0.25, color: '#111d2d', step: 45 },
+    { parallax: 0.30, baseR: 0.75, ampR: 0.22, color: '#162438', step: 35 },
+    { parallax: 0.45, baseR: 0.82, ampR: 0.18, color: '#1c3045', step: 28 },
+  ];
+  for (const cfg of layerConfigs) {
+    const pts = [];
+    for (let x = -400; x < WORLD_W * 2 + 400; x += cfg.step) {
+      let r = cfg.baseR;
+      r -= Math.abs(Math.sin(x * 0.0008 + cfg.parallax * 10)) * cfg.ampR * 0.5;
+      r -= Math.abs(Math.sin(x * 0.002 + cfg.parallax * 20)) * cfg.ampR * 0.3;
+      r -= Math.abs(Math.cos(x * 0.0035 + cfg.parallax * 5)) * cfg.ampR * 0.2;
+      pts.push([x, r]);  // r is ratio of H
+    }
+    mountainLayers.push({ points: pts, color: cfg.color, parallax: cfg.parallax });
+  }
 
-            const sprite = createTextSprite(label, colorStr);
-            sprite.position.y = isMobile ? 20 : 14; 
-            group.add(sprite);
+  trees = [];
+  for (let x = 130; x < 2730; x += 40 + Math.random() * 80) {
+    const rawY = getRawTerrainY(x);
+    if (rawY > 280) trees.push({ x, rawY, h: 18 + Math.random() * 28, w: 8 + Math.random() * 6 });
+  }
 
-            const lineMat = new THREE.LineBasicMaterial({ color: colorHex, transparent: true, opacity: 0.1 });
-            const linePoints = [new THREE.Vector3(0,0,0), position];
-            const lineGeo = new THREE.BufferGeometry().setFromPoints(linePoints);
-            const line = new THREE.Line(lineGeo, lineMat);
-            scene.add(line);
+  progressDots.innerHTML = CAMPS.map(() => '<div class="progress-dot"></div>').join('');
+  player.y = getTerrainY(player.x);
+}
 
-            mesh.userData = { id: id, parentGroup: group };
-            objectsToCheck.push(mesh);
-            animatables.push({ mesh: mesh, group: group, speed: Math.random() * 0.02 + 0.01 });
-        }
+// raw Y without scale (for generation)
+function getRawTerrainY(wx) {
+  for (let i = 0; i < TERRAIN_RAW.length - 1; i++) {
+    const [x0, y0] = TERRAIN_RAW[i], [x1, y1] = TERRAIN_RAW[i + 1];
+    if (wx >= x0 && wx <= x1) return y0 + (wx - x0) / (x1 - x0) * (y1 - y0);
+  }
+  return TERRAIN_RAW[TERRAIN_RAW.length - 1][1];
+}
 
-        // --- UNIFIED LAYOUT STRATEGY ---
-        // We use a tighter layout that works for both.
-        // We moved Projects UP (from -40 to -30) to prevent it falling off screen.
-        // We moved Side nodes IN (from 50 to 40) to make them safer on mobile.
-        
-        createArtifact('summary', 'Summary', 0x00ffff, '#00ffff', 'icosa', new THREE.Vector3(0, 20, 0));
-        createArtifact('skills', 'Skills', 0xff00ff, '#ff00ff', 'torus', new THREE.Vector3(40, -5, 10));
-        createArtifact('experience', 'Experience', 0xffff00, '#ffff00', 'octa', new THREE.Vector3(-40, -5, 10));
-        createArtifact('projects', 'Projects', 0x00ff00, '#00ff00', 'tetra', new THREE.Vector3(0, -30, 20));
+// ===========================================================
+//  INTRO ANIMATION
+// ===========================================================
+let introStars = [];
+for (let i = 0; i < 200; i++) introStars.push({ x: Math.random(), y: Math.random() * 0.65, s: Math.random() * 1.5 + 0.3, t: Math.random() * Math.PI * 2, sp: Math.random() * 2 + 1 });
 
-        // --- 5. INTERACTION & LOOP ---
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-        const light = new THREE.PointLight(0xffffff, 2, 200);
-        scene.add(light);
+function drawIntro() {
+  if (gameStarted) return;
+  const w = introCanvas.width, h = introCanvas.height;
+  ictx.clearRect(0, 0, w, h);
 
-        let targetCamPos = new THREE.Vector3(0, 0, baseZ);
-        let lookAtTarget = new THREE.Vector3(0, 0, 0);
+  for (const s of introStars) {
+    const a = 0.3 + Math.sin(s.t + time * s.sp * 0.02) * 0.4;
+    ictx.fillStyle = `rgba(255,255,255,${a})`;
+    ictx.beginPath(); ictx.arc(s.x * w, s.y * h, s.s, 0, Math.PI * 2); ictx.fill();
+  }
 
-        function handleInteraction(x, y, isClick) {
-            mouse.x = (x / window.innerWidth) * 2 - 1;
-            mouse.y = -(y / window.innerHeight) * 2 + 1;
-            light.position.set(mouse.x * 80, mouse.y * 80, 50);
+  const mts = [[0, .78, .15, '#0d1520'], [0, .82, .12, '#111d2d'], [0, .87, .1, '#1a2a3e']];
+  for (const [ox, by, amp, col] of mts) {
+    ictx.fillStyle = col; ictx.beginPath(); ictx.moveTo(0, h);
+    for (let x = 0; x <= w; x += 8) {
+      let y = h * by - Math.abs(Math.sin(x * 0.003 + ox + 1)) * h * amp - Math.abs(Math.sin(x * 0.007 + ox + 3)) * h * amp * 0.4;
+      ictx.lineTo(x, y);
+    }
+    ictx.lineTo(w, h); ictx.closePath(); ictx.fill();
+  }
 
-            if(isClick) {
-                if(document.getElementById('content-panel').classList.contains('active')) return;
+  // Campfire glow
+  const gx = w / 2, gy = h * 0.88;
+  const grad = ictx.createRadialGradient(gx, gy, 2, gx, gy, 80);
+  grad.addColorStop(0, 'rgba(255,180,60,.15)'); grad.addColorStop(1, 'rgba(255,100,30,0)');
+  ictx.fillStyle = grad; ictx.fillRect(gx - 80, gy - 80, 160, 160);
 
-                raycaster.setFromCamera(mouse, camera);
-                const intersects = raycaster.intersectObjects(objectsToCheck);
+  for (let i = 0; i < 6; i++) {
+    const fx = gx + Math.sin(time * 0.06 + i * 1.2) * 6;
+    const fy = gy - 4 - Math.abs(Math.sin(time * 0.08 + i * 0.8)) * 14;
+    const fs = 2 + Math.sin(time * 0.05 + i) * 1.5;
+    ictx.fillStyle = i < 2 ? 'rgba(255,240,180,.8)' : i < 4 ? 'rgba(255,160,50,.6)' : 'rgba(255,80,30,.4)';
+    ictx.beginPath(); ictx.ellipse(fx, fy, fs, fs * 1.6, 0, 0, Math.PI * 2); ictx.fill();
+  }
 
-                if (intersects.length > 0) {
-                    const obj = intersects[0].object;
-                    openPanel(obj.userData.id);
-                    
-                    // Zoom logic
-                    const offset = obj.userData.parentGroup.position.clone().normalize().multiplyScalar(isMobile ? 60 : 35); 
-                    targetCamPos = obj.userData.parentGroup.position.clone().add(offset);
-                    lookAtTarget = obj.userData.parentGroup.position.clone();
-                }
-            }
-        }
+  time++;
+  requestAnimationFrame(drawIntro);
+}
+drawIntro();
 
-        window.addEventListener('mousemove', (e) => handleInteraction(e.clientX, e.clientY, false));
-        window.addEventListener('click', (e) => handleInteraction(e.clientX, e.clientY, true));
-        window.addEventListener('touchstart', (e) => handleInteraction(e.changedTouches[0].clientX, e.changedTouches[0].clientY, true), {passive: false});
+// ===========================================================
+//  START
+// ===========================================================
+function startGame() {
+  if (gameStarted) return;
+  gameStarted = true;
+  introEl.classList.add('hidden');
+  hudEl.classList.add('visible');
+  initWorld();
+  setTimeout(() => { introEl.style.display = 'none'; }, 1300);
+  showCaption(0);  // show first camp caption immediately
+  gameLoop();
+}
+document.getElementById('startBtn').addEventListener('click', e => { e.stopPropagation(); startGame(); });
+introEl.addEventListener('click', () => startGame());
+document.addEventListener('keydown', e => {
+  if (!gameStarted && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); startGame(); }
+});
 
-        window.addEventListener('resize', () => {
-            // Update Camera Aspect
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            
-            // Update Base Z based on new aspect ratio
-            baseZ = updateCameraBasePosition();
-            
-            // Only reset if panel is NOT open
-            if(!document.getElementById('content-panel').classList.contains('active')) {
-                targetCamPos.z = baseZ;
-            }
-        });
+// ===========================================================
+//  INPUT — KEYBOARD
+// ===========================================================
+document.addEventListener('keydown', e => {
+  keys[e.key] = true;
+  if (e.key === ' ' || e.key === 'e' || e.key === 'E') { e.preventDefault(); tryInteract(); }
+  if (e.key === 'Escape') closePanel();
+});
+document.addEventListener('keyup', e => { keys[e.key] = false; });
 
-        const clock = new THREE.Clock();
-        function animate() {
-            requestAnimationFrame(animate);
-            const time = clock.getElapsedTime();
+// ===========================================================
+//  INPUT — MOBILE BUTTONS
+// ===========================================================
+function bindMobileBtn(id, key) {
+  const el = document.getElementById(id);
+  const on = e => { e.preventDefault(); keys[key] = true; el.classList.add('active'); };
+  const off = e => { e.preventDefault(); keys[key] = false; el.classList.remove('active'); };
+  el.addEventListener('touchstart', on, { passive: false });
+  el.addEventListener('touchend', off, { passive: false });
+  el.addEventListener('touchcancel', off, { passive: false });
+  // Also support mouse for testing
+  el.addEventListener('mousedown', on);
+  el.addEventListener('mouseup', off);
+  el.addEventListener('mouseleave', off);
+}
+bindMobileBtn('mcLeft', 'ArrowLeft');
+bindMobileBtn('mcRight', 'ArrowRight');
 
-            // Particles
-            const pArr = starField.geometry.attributes.position.array;
-            for(let i=0; i<count; i++) {
-                pArr[i*3] += vel[i].x + (mouse.x * 0.5); 
-                pArr[i*3+1] += vel[i].y + (mouse.y * 0.5);
-                pArr[i*3+2] += vel[i].z;
-                if(pArr[i*3] > 400) pArr[i*3] = -400; if(pArr[i*3] < -400) pArr[i*3] = 400;
-                if(pArr[i*3+1] > 400) pArr[i*3+1] = -400; if(pArr[i*3+1] < -400) pArr[i*3+1] = 400;
-            }
-            starField.geometry.attributes.position.needsUpdate = true;
+const interactBtn = document.getElementById('mcInteract');
+interactBtn.addEventListener('touchstart', e => { e.preventDefault(); tryInteract(); }, { passive: false });
+interactBtn.addEventListener('click', tryInteract);
 
-            // Objects
-            animatables.forEach(item => {
-                item.mesh.rotation.x += item.speed;
-                item.mesh.rotation.y += item.speed;
-                // Bobbing effect
-                item.group.position.y += Math.sin(time * 2 + item.group.position.x) * 0.05;
-            });
+// ===========================================================
+//  INPUT — TOUCH SWIPE ON CANVAS
+// ===========================================================
+gameCanvas.addEventListener('touchstart', e => {
+  if (e.touches.length !== 1) return;
+  const t = e.touches[0];
+  touchStartX = t.clientX; touchStartY = t.clientY;
+  touchMoving = false; swipeDir = 0;
+}, { passive: true });
 
-            // Smooth Camera
-            camera.position.lerp(targetCamPos, 0.05);
-            const currentLook = new THREE.Vector3();
-            camera.getWorldDirection(currentLook);
-            const targetLook = new THREE.Vector3().subVectors(lookAtTarget, camera.position).normalize();
-            currentLook.lerp(targetLook, 0.05);
-            camera.lookAt(camera.position.clone().add(currentLook));
+gameCanvas.addEventListener('touchmove', e => {
+  if (e.touches.length !== 1) return;
+  const t = e.touches[0];
+  const dx = t.clientX - touchStartX;
+  if (Math.abs(dx) > 15) {
+    touchMoving = true;
+    swipeDir = dx > 0 ? 1 : -1;
+    keys['ArrowLeft'] = swipeDir < 0;
+    keys['ArrowRight'] = swipeDir > 0;
+  }
+}, { passive: true });
 
-            renderer.render(scene, camera);
-        }
-        animate();
+gameCanvas.addEventListener('touchend', e => {
+  if (touchMoving) {
+    keys['ArrowLeft'] = false;
+    keys['ArrowRight'] = false;
+    swipeDir = 0;
+    touchMoving = false;
+  } else {
+    // Tap — check if near a camp to interact
+    tryInteract();
+  }
+}, { passive: true });
 
-        window.openPanel = function(id) {
-            const data = resumeContent[id];
-            document.getElementById('panel-body').innerHTML = `<div class="panel-header">${data.title}</div>${data.html}`;
-            document.getElementById('content-panel').classList.add('active');
-        };
+// ===========================================================
+//  INPUT — MOUSE WHEEL / TRACKPAD SCROLL
+// ===========================================================
+gameCanvas.addEventListener('wheel', e => {
+  if (!gameStarted) return;
+  e.preventDefault();
+  const delta = (Math.abs(e.deltaY) > Math.abs(e.deltaX)) ? e.deltaY : e.deltaX;
+  scrollVelocity += delta * 0.04;
+  scrollVelocity = Math.max(-8, Math.min(8, scrollVelocity));
+}, { passive: false });
 
-        window.closePanel = function() {
-            document.getElementById('content-panel').classList.remove('active');
-            // Reset to calculated baseZ
-            targetCamPos = new THREE.Vector3(0, 0, baseZ);
-            lookAtTarget = new THREE.Vector3(0, 0, 0);
-        };
-    </script>
+// ===========================================================
+//  INPUT — CLICK ON CAMPFIRE
+// ===========================================================
+gameCanvas.addEventListener('click', e => {
+  if (!gameStarted || panelOpen) return;
+  const rect = gameCanvas.getBoundingClientRect();
+  const clickX = e.clientX - rect.left;
+  const clickY = e.clientY - rect.top;
+  for (let i = 0; i < CAMPS.length; i++) {
+    const sx = CAMPS[i].x - camX;
+    const sy = getTerrainY(CAMPS[i].x) - camY;
+    const dist = Math.sqrt((clickX - sx) ** 2 + (clickY - sy) ** 2);
+    if (dist < 80 * S) { openPanel(i); return; }
+  }
+});
+
+// ===========================================================
+//  PANEL LOGIC
+// ===========================================================
+function tryInteract() {
+  if (!gameStarted) return;
+  if (panelOpen) { closePanel(); return; }
+  if (nearbyCamp >= 0) openPanel(nearbyCamp);
+}
+function openPanel(idx) {
+  hideCaption();
+  panelContent.innerHTML = CAMPS[idx].html;
+  infoPanel.classList.add('open'); panelOpen = true; activeCamp = idx;
+  if (!discovered.has(idx)) {
+    discovered.add(idx);
+    showToast(`${CAMPS[idx].icon} ${CAMPS[idx].name} Discovered!`);
+    updateProgress();
+  }
+  if (idx === CAMPS.length - 1) celebrate();
+}
+function closePanel() { infoPanel.classList.remove('open'); panelOpen = false; activeCamp = -1; showNextCaption(); }
+panelClose.addEventListener('click', closePanel);
+
+function showCaption(idx) {
+  if (idx === activeCaptionIdx) return;  // already showing this one
+  activeCaptionIdx = idx;
+  capLabel.textContent = '';
+  capText.textContent = CAMPS[idx].caption;
+  captionEl.classList.add('show');
+}
+function hideCaption() {
+  activeCaptionIdx = -1;
+  captionEl.classList.remove('show');
+}
+function showNextCaption() {
+  // Find next camp ahead of player
+  for (let i = 0; i < CAMPS.length; i++) {
+    if (CAMPS[i].x > player.x - INTERACT_DIST) { showCaption(i); return; }
+  }
+  hideCaption();  // past all camps
+}
+
+function showToast(msg) {
+  toastEl.textContent = msg; toastEl.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2800);
+}
+function updateProgress() {
+  const dots = progressDots.children;
+  for (let i = 0; i < CAMPS.length; i++) dots[i] && dots[i].classList.toggle('discovered', discovered.has(i));
+  campCountEl.textContent = `${discovered.size}/${CAMPS.length}`;
+}
+function celebrate() {
+  const colors = ['#ffb74d', '#ff8a65', '#4fc3f7', '#81c784', '#e57373', '#ba68c8', '#fff176'];
+  for (let i = 0; i < 60; i++) {
+    setTimeout(() => {
+      const c = document.createElement('div'); c.className = 'confetti';
+      c.style.left = Math.random() * 100 + 'vw'; c.style.top = '-10px';
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.borderRadius = Math.random() > .5 ? '50%' : '0';
+      const sz = 4 + Math.random() * 8; c.style.width = c.style.height = sz + 'px';
+      c.style.animationDuration = (2 + Math.random() * 2) + 's';
+      document.body.appendChild(c); setTimeout(() => c.remove(), 4000);
+    }, i * 50);
+  }
+}
+
+// ===========================================================
+//  UPDATE
+// ===========================================================
+function update() {
+  const speed = CHAR_BASE_SPEED * Math.max(0.8, S);
+
+  let moving = false;
+  if (keys['ArrowLeft'] || keys['a'] || keys['A']) { player.vx = -speed; player.facingRight = false; moving = true; }
+  else if (keys['ArrowRight'] || keys['d'] || keys['D']) { player.vx = speed; player.facingRight = true; moving = true; }
+  else { player.vx *= 0.8; if (Math.abs(player.vx) < 0.1) player.vx = 0; }
+
+  // Scroll velocity (mousewheel / trackpad)
+  if (Math.abs(scrollVelocity) > 0.1) {
+    player.vx += scrollVelocity;
+    scrollVelocity *= 0.92;
+    if (scrollVelocity > 0) player.facingRight = true;
+    else player.facingRight = false;
+    moving = true;
+  } else { scrollVelocity = 0; }
+
+  player.x += player.vx;
+  player.x = Math.max(30, Math.min(WORLD_W - 30, player.x));
+  player.y = getTerrainY(player.x);
+  player.walking = Math.abs(player.vx) > 0.3;
+  if (player.walking) player.frame++;
+
+  // Camera — center on player, slight look-ahead
+  const lookAhead = player.facingRight ? W * 0.08 : -W * 0.08;
+  camTargetX = player.x - W * 0.4 + lookAhead;
+  camTargetX = Math.max(0, Math.min(WORLD_W - W, camTargetX));
+  camX += (camTargetX - camX) * CAM_EASE;
+
+  // Vertical camera — keep character at ~65% screen height
+  camTargetY = player.y - H * 0.65;
+  camTargetY = Math.min(0, camTargetY);
+  camY += (camTargetY - camY) * CAM_EASE;
+
+  // Near camp?
+  nearbyCamp = -1;
+  for (let i = 0; i < CAMPS.length; i++) {
+    if (Math.abs(player.x - CAMPS[i].x) < INTERACT_DIST) { nearbyCamp = i; break; }
+  }
+  if (panelOpen && activeCamp >= 0 && Math.abs(player.x - CAMPS[activeCamp].x) > INTERACT_DIST * 2.5) closePanel();
+
+  // Auto-open panel when reaching fire
+  if (nearbyCamp >= 0 && nearbyCamp !== prevNearbyCamp && !panelOpen) {
+    openPanel(nearbyCamp);
+  }
+  prevNearbyCamp = nearbyCamp;
+
+  // Always show caption for next camp (unless panel is open)
+  if (!panelOpen) showNextCaption();
+
+  // Prompt
+  if (nearbyCamp >= 0 && !panelOpen) {
+    const sx = CAMPS[nearbyCamp].x - camX;
+    const sy = getTerrainY(CAMPS[nearbyCamp].x) - camY - 65 * S;
+    promptEl.style.left = Math.max(10, Math.min(W - 160, sx - 60)) + 'px';
+    promptEl.style.top = Math.max(40, sy) + 'px';
+    promptEl.classList.add('show');
+    if (isMobile) promptEl.innerHTML = 'TAP <kbd>EXPLORE</kbd>';
+    else promptEl.innerHTML = '<kbd>CLICK</kbd> or <kbd>SPACE</kbd> to explore';
+  } else { promptEl.classList.remove('show'); }
+
+  // Altitude
+  const progress = Math.max(0, Math.min(1, (player.x - TERRAIN_RAW[0][0]) / (TERRAIN_RAW[TERRAIN_RAW.length - 1][0] - TERRAIN_RAW[0][0])));
+  hudAlt.textContent = Math.round(4200 + progress * 4649);
+
+  // Campfire sparks
+  const sparkRate = isMobile ? 0.15 : 0.3;
+  for (const camp of CAMPS) {
+    if (Math.random() < sparkRate) {
+      sparks.push({ x: camp.x + Math.random() * 10 - 5, y: getTerrainY(camp.x) - 8 * S,
+        vx: Math.random() * 0.6 - 0.3, vy: -(0.8 + Math.random() * 1.2) * S,
+        life: 1, size: (1 + Math.random() * 2) * S });
+    }
+  }
+  for (let i = sparks.length - 1; i >= 0; i--) {
+    const s = sparks[i]; s.x += s.vx; s.y += s.vy; s.vy -= 0.01; s.life -= 0.018;
+    if (s.life <= 0) sparks.splice(i, 1);
+  }
+
+  // Clouds
+  for (const c of clouds) { c.x += c.speed; if (c.x > WORLD_W * 1.5) c.x = -300; }
+
+  time++;
+}
+
+// ===========================================================
+//  RENDERING
+// ===========================================================
+function drawSky() {
+  const progress = Math.max(0, Math.min(1, camX / Math.max(1, WORLD_W - W)));
+  const r1 = 7 + progress * 15, g1 = 9 + progress * 15, b1 = 15 + progress * 20;
+  const r2 = 13 + progress * 40, g2 = 27 + progress * 50, b2 = 42 + progress * 60;
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, `rgb(${r1},${g1},${b1})`);
+  grad.addColorStop(0.6, `rgb(${r2},${g2},${b2})`);
+  grad.addColorStop(1, `rgb(${r2 + 15},${g2 + 20},${b2 + 15})`);
+  ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+
+  if (progress > 0.5) {
+    const a = (progress - 0.5) * 0.4;
+    const sg = ctx.createRadialGradient(W * 0.8, H * 0.2, 0, W * 0.8, H * 0.2, H * 0.7);
+    sg.addColorStop(0, `rgba(255,140,50,${a * 0.3})`);
+    sg.addColorStop(0.4, `rgba(255,100,60,${a * 0.1})`);
+    sg.addColorStop(1, 'rgba(255,80,40,0)');
+    ctx.fillStyle = sg; ctx.fillRect(0, 0, W, H);
+  }
+}
+
+function drawStars() {
+  const progress = Math.max(0, Math.min(1, camX / Math.max(1, WORLD_W - W)));
+  const alpha = Math.max(0, 1 - progress * 1.5);
+  if (alpha <= 0) return;
+  for (const s of stars) {
+    const sx = s.x * 0.05 - camX * 0.02;
+    const wrapped = ((sx % W) + W) % W;
+    const a = alpha * (0.3 + Math.sin(s.twinkle + time * 0.02 * s.speed) * 0.4);
+    if (a <= 0) continue;
+    ctx.fillStyle = `rgba(255,255,255,${a})`;
+    ctx.beginPath(); ctx.arc(wrapped, s.y * H, s.size, 0, Math.PI * 2); ctx.fill();
+  }
+}
+
+function drawClouds() {
+  for (const c of clouds) {
+    const sx = c.x - camX * 0.15;
+    if (sx < -300 || sx > W + 300) continue;
+    const cy = c.y * H;
+    ctx.fillStyle = `rgba(200,210,230,${c.opacity})`;
+    ctx.beginPath(); ctx.ellipse(sx, cy, c.w * S / 2, c.h * S / 2, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(sx - c.w * 0.25, cy + c.h * 0.15, c.w * S * 0.35, c.h * S * 0.4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(sx + c.w * 0.3, cy + c.h * 0.1, c.w * S * 0.3, c.h * S * 0.35, 0, 0, Math.PI * 2); ctx.fill();
+  }
+}
+
+function drawMountainLayers() {
+  for (const layer of mountainLayers) {
+    ctx.fillStyle = layer.color;
+    ctx.beginPath(); ctx.moveTo(-10, H + 10);
+    for (const [px, pr] of layer.points) {
+      ctx.lineTo(px - camX * layer.parallax, pr * H - camY * layer.parallax * 0.3);
+    }
+    ctx.lineTo(W + 10, H + 10); ctx.closePath(); ctx.fill();
+  }
+}
+
+function drawTrees() {
+  for (const t of trees) {
+    const sx = t.x - camX;
+    if (sx < -40 || sx > W + 40) continue;
+    const sy = t.rawY * S - camY;
+    const th = t.h * S, tw = t.w * S;
+
+    ctx.fillStyle = '#2d1f10';
+    ctx.fillRect(sx - 1.5 * S, sy - th * 0.3, 3 * S, th * 0.3);
+
+    for (let i = 0; i < 3; i++) {
+      const ly = sy - th * 0.25 - i * (th * 0.25);
+      const lw = tw * (1 - i * 0.25);
+      ctx.fillStyle = i === 0 ? '#1a3a2a' : '#1e4d35';
+      ctx.beginPath(); ctx.moveTo(sx, ly - th * 0.28); ctx.lineTo(sx - lw, ly); ctx.lineTo(sx + lw, ly); ctx.closePath(); ctx.fill();
+    }
+  }
+}
+
+function drawTerrainGround() {
+  ctx.beginPath(); ctx.moveTo(-10, H + 10);
+  for (const [tx, ty] of TERRAIN_RAW) ctx.lineTo(tx - camX, ty * S - camY);
+  ctx.lineTo(WORLD_W - camX + 10, H + 10); ctx.closePath();
+
+  const grad = ctx.createLinearGradient(-camX * 0.3, 0, WORLD_W - camX * 0.3, 0);
+  grad.addColorStop(0, '#2d4a2e'); grad.addColorStop(0.25, '#3a5a35');
+  grad.addColorStop(0.45, '#5a5a4a'); grad.addColorStop(0.65, '#7a7a70');
+  grad.addColorStop(0.8, '#b0b0a8'); grad.addColorStop(1, '#e8e8e5');
+  ctx.fillStyle = grad; ctx.fill();
+
+  // Surface line
+  ctx.strokeStyle = 'rgba(255,255,255,.06)'; ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i < TERRAIN_RAW.length; i++) {
+    const [tx, ty] = TERRAIN_RAW[i]; const sx = tx - camX;
+    i === 0 ? ctx.moveTo(sx, ty * S - camY) : ctx.lineTo(sx, ty * S - camY);
+  }
+  ctx.stroke();
+
+  // Snow cap highlight
+  ctx.strokeStyle = 'rgba(255,255,255,.15)'; ctx.lineWidth = 3 * S;
+  ctx.beginPath(); let started = false;
+  for (const [tx, ty] of TERRAIN_RAW) {
+    if (tx > 2925) { const sx = tx - camX; if (!started) { ctx.moveTo(sx, ty * S - camY - 1); started = true; } else ctx.lineTo(sx, ty * S - camY - 1); }
+  }
+  ctx.stroke();
+}
+
+function drawCamps() {
+  for (let i = 0; i < CAMPS.length; i++) {
+    const camp = CAMPS[i];
+    const sx = camp.x - camX;
+    if (sx < -100 || sx > W + 100) continue;
+    const sy = getTerrainY(camp.x) - camY;
+
+    // Glow (enlarged)
+    const fS = S * 1.5; // fire scale
+    const glowR = (55 + Math.sin(time * 0.08) * 10) * S;
+    const glow = ctx.createRadialGradient(sx, sy - 10 * fS, 2, sx, sy - 10 * fS, glowR);
+    glow.addColorStop(0, 'rgba(255,180,60,.22)'); glow.addColorStop(0.5, 'rgba(255,120,40,.08)');
+    glow.addColorStop(1, 'rgba(255,80,20,0)');
+    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(sx, sy - 10 * fS, glowR, 0, Math.PI * 2); ctx.fill();
+
+    // Logs (enlarged)
+    ctx.save(); ctx.translate(sx, sy);
+    ctx.fillStyle = '#3d2810';
+    ctx.save(); ctx.rotate(-0.35); ctx.fillRect(-14 * fS, -3.5 * fS, 28 * fS, 7 * fS); ctx.restore();
+    ctx.save(); ctx.rotate(0.35); ctx.fillRect(-14 * fS, -3.5 * fS, 28 * fS, 7 * fS); ctx.restore();
+    ctx.restore();
+
+    // Flames (enlarged, more particles)
+    for (let f = 0; f < 7; f++) {
+      const fx = sx + Math.sin(time * 0.07 + f * 1.1) * 6 * fS;
+      const fy = sy - (8 + Math.abs(Math.sin(time * 0.09 + f * 0.9)) * 18) * fS;
+      const fs = (3.5 + Math.sin(time * 0.06 + f) * 2) * fS;
+      ctx.fillStyle = f < 2 ? 'rgba(255,240,180,.85)' : f < 5 ? 'rgba(255,150,40,.7)' : 'rgba(255,70,20,.5)';
+      ctx.beginPath(); ctx.ellipse(fx, fy, fs, fs * 1.5, 0, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // Diamond marker
+    const isNear = nearbyCamp === i;
+    const bob = Math.sin(time * 0.04 + i) * 4 * S;
+    const my = sy - 55 * S + bob;
+    const mSize = (isNear ? 12 : 8) * S;
+
+    // Pulsing ring — always visible
+    const pulseR = (14 + Math.sin(time * 0.06 + i) * 5) * S;
+    ctx.strokeStyle = `rgba(255,183,77,${isNear ? 0.5 : 0.2})`; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(sx, my, pulseR, 0, Math.PI * 2); ctx.stroke();
+    if (!discovered.has(i)) {
+      const outerR = (20 + Math.sin(time * 0.04 + i * 2) * 6) * S;
+      ctx.strokeStyle = 'rgba(255,183,77,.1)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(sx, my, outerR, 0, Math.PI * 2); ctx.stroke();
+    }
+
+    ctx.fillStyle = discovered.has(i) ? '#ffb74d' : 'rgba(255,183,77,.5)';
+    ctx.save(); ctx.translate(sx, my); ctx.rotate(Math.PI / 4);
+    ctx.fillRect(-mSize / 2, -mSize / 2, mSize, mSize);
+    ctx.restore();
+
+    // Label — always visible, shows portfolio section
+    ctx.fillStyle = isNear ? 'rgba(255,183,77,.9)' : 'rgba(255,183,77,.5)';
+    ctx.font = `600 ${Math.round(10 * Math.max(0.7, S))}px Poppins,sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(camp.label.toUpperCase(), sx, my - 14 * S);
+    if (!discovered.has(i)) {
+      ctx.fillStyle = 'rgba(255,183,77,.35)';
+      ctx.font = `600 ${Math.round(8 * Math.max(0.7, S))}px Poppins,sans-serif`;
+      ctx.fillText('CLICK TO EXPLORE', sx, my + 18 * S);
+    }
+  }
+}
+
+function drawSparks() {
+  for (const s of sparks) {
+    const sx = s.x - camX;
+    if (sx < -10 || sx > W + 10) continue;
+    ctx.fillStyle = `rgba(255,${150 + Math.random() * 80|0},40,${s.life * 0.8})`;
+    ctx.beginPath(); ctx.arc(sx, s.y - camY, s.size * s.life, 0, Math.PI * 2); ctx.fill();
+  }
+}
+
+function drawCharacter() {
+  const sx = player.x - camX;
+  const sy = player.y - camY;
+  const cs = S * 1.35; // character scale (enlarged)
+  ctx.save(); ctx.translate(sx, sy);
+  if (!player.facingRight) ctx.scale(-1, 1);
+
+  const walk = player.walking ? player.frame : 0;
+  const legSwing = Math.sin(walk * 0.18) * 10 * cs;
+  const bodyBob = player.walking ? Math.abs(Math.sin(walk * 0.18)) * 2 * cs : Math.sin(time * 0.03) * 0.5 * cs;
+
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,.15)';
+  ctx.beginPath(); ctx.ellipse(0, 0, 12 * cs, 4 * cs, 0, 0, Math.PI * 2); ctx.fill();
+
+  // Legs
+  ctx.strokeStyle = '#3d2c20'; ctx.lineWidth = 4 * cs; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-1 * cs, -14 * cs); ctx.lineTo(-legSwing, -2 * cs); ctx.stroke();
+  ctx.fillStyle = '#2a1a0e'; ctx.fillRect(-legSwing - 4 * cs, -3 * cs, 8 * cs, 5 * cs);
+  ctx.beginPath(); ctx.moveTo(1 * cs, -14 * cs); ctx.lineTo(legSwing, -2 * cs); ctx.stroke();
+  ctx.fillRect(legSwing - 4 * cs, -3 * cs, 8 * cs, 5 * cs);
+
+  // Body
+  ctx.fillStyle = '#d44030';
+  ctx.beginPath(); ctx.ellipse(0, (-24 - bodyBob / cs) * cs, 9 * cs, 13 * cs, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#b83025'; ctx.lineWidth = 1 * cs;
+  ctx.beginPath(); ctx.moveTo(0, (-36) * cs - bodyBob); ctx.lineTo(0, (-12) * cs - bodyBob); ctx.stroke();
+
+  // Backpack
+  ctx.fillStyle = '#8B6914';
+  ctx.fillRect(-13 * cs, -35 * cs - bodyBob, 9 * cs, 16 * cs);
+  ctx.fillStyle = '#a07818';
+  ctx.fillRect(-14 * cs, -33 * cs - bodyBob, 7 * cs, 12 * cs);
+  ctx.strokeStyle = '#6d520f'; ctx.lineWidth = 1.5 * cs;
+  ctx.beginPath(); ctx.moveTo(-8 * cs, -35 * cs - bodyBob); ctx.lineTo(-3 * cs, -28 * cs - bodyBob); ctx.stroke();
+
+  // Neck
+  ctx.fillStyle = '#e8b88a';
+  ctx.fillRect(-2 * cs, -38 * cs - bodyBob, 4 * cs, 4 * cs);
+
+  // Head
+  ctx.fillStyle = '#f0c8a0';
+  ctx.beginPath(); ctx.arc(1 * cs, -44 * cs - bodyBob, 8 * cs, 0, Math.PI * 2); ctx.fill();
+
+  // Eye
+  ctx.fillStyle = '#2c2c2c';
+  ctx.beginPath(); ctx.arc(4 * cs, -45 * cs - bodyBob, 1.2 * cs, 0, Math.PI * 2); ctx.fill();
+
+  // Smile
+  ctx.strokeStyle = '#c8946a'; ctx.lineWidth = 1 * cs;
+  ctx.beginPath(); ctx.arc(4 * cs, -42 * cs - bodyBob, 3 * cs, 0.1, Math.PI * 0.7); ctx.stroke();
+
+  // Beanie
+  ctx.fillStyle = '#2c3e50';
+  ctx.beginPath(); ctx.arc(1 * cs, -48 * cs - bodyBob, 8.5 * cs, Math.PI, 0); ctx.fill();
+  ctx.fillRect(-7.5 * cs, -49 * cs - bodyBob, 17 * cs, 4 * cs);
+  ctx.fillStyle = '#d44030';
+  ctx.fillRect(-7 * cs, -49 * cs - bodyBob, 16 * cs, 2.5 * cs);
+  ctx.fillStyle = '#e8e8e8';
+  ctx.beginPath(); ctx.arc(1 * cs, -56 * cs - bodyBob, 3.5 * cs, 0, Math.PI * 2); ctx.fill();
+
+  // Hiking pole
+  const poleSwing = Math.sin(walk * 0.18 + Math.PI) * 0.3;
+  ctx.strokeStyle = '#999'; ctx.lineWidth = 1.8 * cs; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(7 * cs, -22 * cs - bodyBob);
+  ctx.lineTo((7 + Math.sin(poleSwing) * 18) * cs, 2 * cs);
+  ctx.stroke();
+  ctx.fillStyle = '#555';
+  ctx.beginPath(); ctx.arc(7 * cs, -22 * cs - bodyBob, 2 * cs, 0, Math.PI * 2); ctx.fill();
+
+  ctx.restore();
+}
+
+function drawAurora() {
+  const progress = Math.max(0, Math.min(1, camX / Math.max(1, WORLD_W - W)));
+  if (progress < 0.6) return;
+  const a = (progress - 0.6) * 0.5;
+  ctx.save(); ctx.globalCompositeOperation = 'screen';
+  for (let i = 0; i < 3; i++) {
+    const wave = time * 0.008 + i * 2;
+    ctx.strokeStyle = `rgba(${100 + i * 40},${220 - i * 30},${180 + i * 20},${a * 0.15})`;
+    ctx.lineWidth = (8 - i * 2) * S; ctx.beginPath();
+    for (let x = 0; x < W; x += 6) {
+      const y = H * 0.12 + Math.sin(x * 0.003 + wave) * 40 * S + Math.sin(x * 0.008 + wave * 1.5 + i) * 20 * S;
+      x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawFlag() {
+  const flagX = 4800;
+  const sx = flagX - camX;
+  if (sx < -60 || sx > W + 60) return;
+  const sy = getTerrainY(flagX) - camY;
+
+  ctx.strokeStyle = '#bbb'; ctx.lineWidth = 3 * S; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx, sy - 50 * S); ctx.stroke();
+
+  ctx.fillStyle = '#ffb74d'; ctx.beginPath();
+  ctx.moveTo(sx, sy - 50 * S);
+  const w1 = Math.sin(time * 0.06) * 3 * S, w2 = Math.sin(time * 0.06 + 1) * 3 * S;
+  ctx.quadraticCurveTo(sx + 15 * S, sy - 48 * S + w1, sx + 30 * S, sy - 45 * S + w2);
+  ctx.lineTo(sx + 28 * S, sy - 38 * S + w1);
+  ctx.quadraticCurveTo(sx + 14 * S, sy - 40 * S + w2, sx, sy - 38 * S);
+  ctx.closePath(); ctx.fill();
+
+  ctx.fillStyle = '#1a1a2e'; ctx.font = `bold ${Math.round(8 * S)}px sans-serif`; ctx.textAlign = 'center';
+  ctx.fillText('\u2605', sx + 15 * S, sy - 42 * S + w1);
+}
+
+function drawMinimap() {
+  const mapS = Math.max(0.55, Math.min(1, W / 1000)); // scale minimap for small screens
+  const mw = 160 * mapS, mh = 36 * mapS;
+  const mx = W / 2 - mw / 2, my = H - (isMobile ? 85 : 50);
+
+  ctx.save();
+  ctx.fillStyle = 'rgba(10,14,26,.5)';
+  ctx.strokeStyle = 'rgba(255,183,77,.15)'; ctx.lineWidth = 1;
+  ctx.beginPath();
+  // Simple rounded rect
+  const r = 6 * mapS;
+  ctx.moveTo(mx - 4 + r, my - 4);
+  ctx.lineTo(mx + mw + 4 - r, my - 4);
+  ctx.quadraticCurveTo(mx + mw + 4, my - 4, mx + mw + 4, my - 4 + r);
+  ctx.lineTo(mx + mw + 4, my + mh + 4 - r);
+  ctx.quadraticCurveTo(mx + mw + 4, my + mh + 4, mx + mw + 4 - r, my + mh + 4);
+  ctx.lineTo(mx - 4 + r, my + mh + 4);
+  ctx.quadraticCurveTo(mx - 4, my + mh + 4, mx - 4, my + mh + 4 - r);
+  ctx.lineTo(mx - 4, my - 4 + r);
+  ctx.quadraticCurveTo(mx - 4, my - 4, mx - 4 + r, my - 4);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+
+  // Profile
+  ctx.strokeStyle = 'rgba(255,255,255,.2)'; ctx.lineWidth = 1; ctx.beginPath();
+  for (let i = 0; i < TERRAIN_RAW.length; i++) {
+    const [tx, ty] = TERRAIN_RAW[i];
+    const px = mx + (tx / WORLD_W) * mw;
+    const py = my + mh - (590 - ty) / (590 - 130) * mh;
+    i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+  }
+  ctx.stroke();
+
+  // Camp dots
+  for (let i = 0; i < CAMPS.length; i++) {
+    const camp = CAMPS[i];
+    const px = mx + (camp.x / WORLD_W) * mw;
+    const rawY = getRawTerrainY(camp.x);
+    const py = my + mh - (590 - rawY) / (590 - 130) * mh;
+    ctx.fillStyle = discovered.has(i) ? '#ffb74d' : 'rgba(255,183,77,.3)';
+    ctx.beginPath(); ctx.arc(px, py - 2, 2.5 * mapS, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // Player
+  const px = mx + (player.x / WORLD_W) * mw;
+  const rawY = getRawTerrainY(player.x);
+  const py = my + mh - (590 - rawY) / (590 - 130) * mh;
+  ctx.fillStyle = '#d44030';
+  ctx.beginPath(); ctx.arc(px, py - 2, 3.5 * mapS, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(px, py - 2, 3.5 * mapS, 0, Math.PI * 2); ctx.stroke();
+
+  ctx.restore();
+}
+
+// ===========================================================
+//  MAIN RENDER
+// ===========================================================
+function render() {
+  ctx.clearRect(0, 0, W, H);
+  drawSky();
+  drawStars();
+  drawAurora();
+  drawClouds();
+  drawMountainLayers();
+  drawTrees();
+  drawTerrainGround();
+  drawCamps();
+  drawSparks();
+  drawCharacter();
+  drawFlag();
+  drawMinimap();
+}
+
+// ===========================================================
+//  GAME LOOP
+// ===========================================================
+function gameLoop() {
+  update();
+  render();
+  requestAnimationFrame(gameLoop);
+}
+
+// ===========================================================
+//  POLYFILL
+// ===========================================================
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+    if (typeof r === 'number') r = [r, r, r, r];
+    this.moveTo(x + r[0], y);
+    this.lineTo(x + w - r[1], y);
+    this.quadraticCurveTo(x + w, y, x + w, y + r[1]);
+    this.lineTo(x + w, y + h - r[2]);
+    this.quadraticCurveTo(x + w, y + h, x + w - r[2], y + h);
+    this.lineTo(x + r[3], y + h);
+    this.quadraticCurveTo(x, y + h, x, y + h - r[3]);
+    this.lineTo(x, y + r[0]);
+    this.quadraticCurveTo(x, y, x + r[0], y);
+    this.closePath();
+  };
+}
+</script>
 </body>
 </html>
